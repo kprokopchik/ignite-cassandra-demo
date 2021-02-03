@@ -1,0 +1,5 @@
+rootProject.name = 'capstone-cache-1'
+
+include 'common',
+        'demo-app',
+        'ignite-node'

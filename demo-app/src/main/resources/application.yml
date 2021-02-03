@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    cassandra:
+      keyspace-name: "capstone_inmemory_1"
+      local-datacenter: "datacenter1"
+
+ignite:
+  discovery:
+    multicast:
+      addresses:
+        - localhost:47500
+
+#ignite-client:
+#  addresses: 127.0.0.1:10800
+#  timeout: 10000
+#  tcpNoDelay: false

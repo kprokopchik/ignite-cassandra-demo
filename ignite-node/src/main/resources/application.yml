@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  data:
+    cassandra:
+      keyspace-name: capstone_inmemory_1
+      local-datacenter: datacenter1
+      contact-points: localhost
+
+ignite:
+  igniteInstanceName: clnt-instance-1
+  clientMode: false
+  peerClassLoadingEnabled: true

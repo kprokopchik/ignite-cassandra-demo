@@ -1,0 +1,103 @@
+version: '2'
+
+services:
+
+  app:
+    build: ./demo-app
+    container_name: app
+    depends_on:
+      ignite-node-1:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra
+      - IGNITE_DISCOVERY_MULTICAST_ADDRESSES=ignite-node-1:47500
+    ports:
+      - "8080:8080"
+
+  cassandra:
+    image: "cassandra"
+    container_name: cassandra
+    expose:
+      - "9042"
+    volumes:
+      - /tmp/cassandra-data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "[ $$(nodetool statusgossip) = running ]"]
+      interval: 10s
+      timeout: 5s
+      retries: 50
+
+  cassandra-load-keyspace:
+    container_name: cassandra-load-keyspace
+    image: cassandra
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./cassandra-data-loader/prepare-keyspace:/prepare-keyspace
+    command: bash -c "echo loading cassandra keyspace && sleep 3 && /prepare-keyspace/load-data.sh"
+
+  ignite-node-1:
+      build: ./ignite-node
+      container_name: ignite-node-1
+      depends_on:
+        cassandra-load-keyspace:
+          condition: service_started
+      environment:
+        - SERVER_PORT=8181
+        - IGNITE_JETTY_PORT=8182
+        - SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra
+      ports:
+        - "8181:8181"
+        - "8182:8182"
+      expose:
+        - "10800" # thin client connections
+        - "11211" # tcpPort
+        - "47100" # TcpCommunicationSpi
+        - "47500" # TcpDiscoverySp
+        - "48100" # sharedMemoryPort
+        - "49128" # Remote Management
+
+  ignite-node-2:
+    build: ./ignite-node
+    container_name: ignite-node-2
+    depends_on:
+      cassandra-load-keyspace:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8281
+      - IGNITE_JETTY_PORT=8282
+      - SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra
+    ports:
+      - "8281:8281"
+      - "8282:8282"
+    expose:
+      - "10800" # thin client connections
+      - "11211" # tcpPort
+      - "47100" # TcpCommunicationSpi
+      - "47500" # TcpDiscoverySp
+      - "48100" # sharedMemoryPort
+      - "49128" # Remote Management
+
+  ignite-node-3:
+    build: ./ignite-node
+    container_name: ignite-node-3
+    depends_on:
+      cassandra-load-keyspace:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8381
+      - IGNITE_JETTY_PORT=8382
+      - SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra
+    ports:
+      - "8381:8381"
+      - "8382:8382"
+    expose:
+      - "10800" # thin client connections
+      - "11211" # tcpPort
+      - "47100" # TcpCommunicationSpi
+      - "47500" # TcpDiscoverySp
+      - "48100" # sharedMemoryPort
+      - "49128" # Remote Management
+

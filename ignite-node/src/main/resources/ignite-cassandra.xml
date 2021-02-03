@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="org.apache.ignite.cache.store.cassandra.datasource.DataSource" name="cassandra">
+        <property name="contactPoints" value="${spring.data.cassandra.contact-points:127.0.0.1}"/>
+        <property name="loadBalancingPolicy" ref="loadBalancingPolicy"/>
+    </bean>
+
+    <bean id="loadBalancingPolicy" class="com.datastax.driver.core.policies.TokenAwarePolicy">
+        <constructor-arg type="com.datastax.driver.core.policies.LoadBalancingPolicy">
+            <bean class="com.datastax.driver.core.policies.RoundRobinPolicy"/>
+        </constructor-arg>
+    </bean>
+
+    <bean name="jcpenneyProductCache" class="org.apache.ignite.configuration.CacheConfiguration">
+        <property name="name" value="Product"/>
+        <property name="readThrough" value="true"/>
+        <property name="writeThrough" value="true"/>
+        <property name="statisticsEnabled" value="true"/>
+        <property name="sqlSchema" value="jcpenney_products"/>
+        <property name="indexedTypes">
+            <list>
+                <value type="java.lang.Class">java.util.UUID</value>
+                <value type="java.lang.Class">com.example.data.model.Product</value>
+            </list>
+        </property>
+        <property name="cacheStoreFactory">
+            <bean class="org.apache.ignite.cache.store.cassandra.CassandraCacheStoreFactory">
+                <property name="dataSource" ref="cassandra"/>
+                <property name="persistenceSettings">
+                    <bean class="org.apache.ignite.cache.store.cassandra.persistence.KeyValuePersistenceSettings">
+                        <constructor-arg type="org.springframework.core.io.Resource"
+                                         value="classpath:/ignite/product-persistence.xml"
+                        />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <property name="expiryPolicyFactory">
+            <bean class="javax.cache.expiry.CreatedExpiryPolicy" factory-method="factoryOf">
+                <constructor-arg>
+                    <bean class="javax.cache.expiry.Duration">
+                        <constructor-arg value="MINUTES"/>
+                        <constructor-arg value="1"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean class="org.apache.ignite.configuration.IgniteConfiguration">
+        <property name="peerClassLoadingEnabled" value="true"/>
+<!--        <property name="connectorConfiguration">-->
+<!--            <bean class="org.apache.ignite.configuration.ConnectorConfiguration">-->
+<!--                <property name="jettyPath" value="jetty.xml"/>-->
+<!--            </bean>-->
+<!--        </property>-->
+        <property name="cacheConfiguration">
+            <list>
+                <ref bean="jcpenneyProductCache"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

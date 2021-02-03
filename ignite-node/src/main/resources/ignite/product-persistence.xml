@@ -1,0 +1,9 @@
+<persistence keyspace="capstone_inmemory_1" table="jcpenney_products">
+    <keyPersistence class="java.util.UUID"
+                    strategy="PRIMITIVE"
+                    column="uniq_id"
+    />
+    <valuePersistence class="com.example.data.model.Product"
+                      strategy="POJO"
+    />
+</persistence>
