@@ -80,6 +80,11 @@ case "`uname`" in
     ;;
 esac
 
+if [ ! -f "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" ]
+then
+     curl https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar -o $APP_HOME/gradle/wrapper/gradle-wrapper.jar
+fi
+
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 # Determine the Java command to use to start the JVM.
