@@ -9,7 +9,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public enum PriceType {
     LIST(Product::getListPrice, "listPrice"),
-    SELL(Product::getSalePrice, "sellPrice");
+    SALE(Product::getSalePrice, "salePrice");
 
     private final Function<Product, BigDecimal> extractor;
     private final String fieldName;
