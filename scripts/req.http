@@ -1,0 +1,24 @@
+GET http://localhost:8181/actuator/info
+
+###
+
+GET http://localhost:8080/product/b6c0b6be-a69c-7229-3958-5baeac73c13d?useCache=false
+
+###
+
+GET http://localhost:8080/product/b6c0b6be-a69c-7229-3958-5baeac73c13d?useCache=true
+
+###
+
+GET http://localhost:8080/product/by-price?from=0&to=44
+
+###
+
+POST http://localhost:8181/cache/load/Product
+
+###
+
+POST http://localhost:8181/cache/ttl/Product?ttl=1&timeUnit=HOURS
+
+###
+

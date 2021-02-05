@@ -3,7 +3,10 @@ version: '2'
 services:
 
   app:
-    build: ./demo-app
+    build:
+      context: ./demo-app
+      args:
+        JMX_REMOTE_PORT: 5005
     container_name: app
     depends_on:
       ignite-node-1:
@@ -14,12 +17,22 @@ services:
       - IGNITE_DISCOVERY_MULTICAST_ADDRESSES=ignite-node-1:47500
     ports:
       - "8080:8080"
+      - "5005:5005"
 
   cassandra:
     image: "cassandra"
     container_name: cassandra
     expose:
       - "9042"
+    ports:
+      - "5007:5007"
+    environment:
+      - JAVA_TOOL_OPTIONSs=-Dcom.sun.management.jmxremote.ssl=false
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.port=5007
+          -Dcom.sun.management.jmxremote.rmi.port=5007
+          -Dcom.sun.management.jmxremote.host=0.0.0.0
+          -Djava.rmi.server.hostname=0.0.0.0
     volumes:
       - /tmp/cassandra-data:/var/lib/cassandra
     healthcheck:
@@ -36,10 +49,13 @@ services:
         condition: service_healthy
     volumes:
       - ./cassandra-data-loader/prepare-keyspace:/prepare-keyspace
-    command: bash -c "echo loading cassandra keyspace && sleep 3 && /prepare-keyspace/load-data.sh"
+    command: bash -c "echo loading cassandra keyspace && sleep 5 && /prepare-keyspace/load-data.sh"
 
   ignite-node-1:
-      build: ./ignite-node
+      build:
+        context: ./ignite-node
+        args:
+          JMX_REMOTE_PORT: 5001
       container_name: ignite-node-1
       depends_on:
         cassandra-load-keyspace:
@@ -51,6 +67,7 @@ services:
       ports:
         - "8181:8181"
         - "8182:8182"
+        - "5001:5001"
       expose:
         - "10800" # thin client connections
         - "11211" # tcpPort
@@ -60,7 +77,10 @@ services:
         - "49128" # Remote Management
 
   ignite-node-2:
-    build: ./ignite-node
+    build:
+      context: ./ignite-node
+      args:
+        JMX_REMOTE_PORT: 5002
     container_name: ignite-node-2
     depends_on:
       cassandra-load-keyspace:
@@ -72,6 +92,7 @@ services:
     ports:
       - "8281:8281"
       - "8282:8282"
+      - "5002:5002"
     expose:
       - "10800" # thin client connections
       - "11211" # tcpPort
@@ -81,7 +102,10 @@ services:
       - "49128" # Remote Management
 
   ignite-node-3:
-    build: ./ignite-node
+    build:
+      context: ./ignite-node
+      args:
+        JMX_REMOTE_PORT: 5003
     container_name: ignite-node-3
     depends_on:
       cassandra-load-keyspace:
@@ -93,6 +117,7 @@ services:
     ports:
       - "8381:8381"
       - "8382:8382"
+      - "5003:5003"
     expose:
       - "10800" # thin client connections
       - "11211" # tcpPort

@@ -6,6 +6,11 @@ spring:
     cassandra:
       keyspace-name: "capstone_inmemory_1"
       local-datacenter: "datacenter1"
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  jmx:
+    enabled: true
 
 ignite:
   discovery:
